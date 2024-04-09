@@ -1,0 +1,13 @@
+# All of these are auto-generated files by FiguraRewriteVSDocs' installer file.
+#
+# If you wish to have these files, go to
+# <https://github.com/GrandpaScout/FiguraRewriteVSDocs>, get the installer, and run it in the
+# folder you wish to use the documentation in.
+.vscode
+.luarc.json
+*.code-workspace
+install.bat
+
+# Private folders and files
+/__**
+/_*
