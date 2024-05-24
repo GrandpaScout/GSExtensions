@@ -57,7 +57,7 @@ local m_clamp = math.clamp
 local m_lerp = math.lerp
 local m_min = math.min
 local m_rad = math.rad
-local m_tan = math.rad
+local m_tan = math.tan
 
 local client = client
 local c_getCameraPos = client.getCameraPos

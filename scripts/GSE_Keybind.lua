@@ -77,7 +77,7 @@ local b_btest = bit32.btest
 
 ---### [GS Extensions]
 ---An enum of numerical key codes.
-KEYCODE = {
+KEY = {
   -- Undefined key
   UNKNOWN = 0,
 

@@ -150,7 +150,7 @@ end
 ---* `VSC_`: Text colors of VSCode's Dark theme.
 ---* `SM_`: Source console text colors.
 ---* `FIG_`: Base Figura colors or colors of Figura assets.
----* `USR_`: Colors of well-known Figura users. Want your color in this category? Ask GrandpaScout.
+---* `USR_`: Colors of well-known Figura users. Want your color in this category? Ask.
 COLOR = {
   ---### `#FFFFFF`
   WHITE = v_icol(0xFFFFFF),
@@ -574,7 +574,7 @@ end
 ---Invalid names will return nothing.
 ---@param name string
 ---@return Vector3? color
-function colors.cssColor(name)
+function colors.css(name)
   name = name:lower()
   if css_colorcache[name] then
     return vectors.hexToRGB(css_colorcache[name])

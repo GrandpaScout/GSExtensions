@@ -69,8 +69,8 @@ local thismt = {
 
 
 local _NAN = 0 / 0
-local _MAXFLOAT = 340282346638528859811704183484516925440
-local _MINFLOAT = 2 ^ -149
+local _MAXFLOAT = 2^128 * (0xFFFFFF * 2^-24)
+local _MINFLOAT = 2^-149
 
 local m_huge = math.huge
 local m_abs = math.abs

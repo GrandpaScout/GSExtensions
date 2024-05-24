@@ -48,6 +48,9 @@ local thismt = {
 ---====  GLOBALS  ===================================================================================================---
 ---==================================================================================================================---
 
+
+---@diagnostic disable: lowercase-global
+
 ---### [GS Extensions]
 ---The avatar's name.
 AVATAR_NAME = avatar:getName()
@@ -65,24 +68,26 @@ HOST = host:isHost()
 ---
 ---A static version of `client.getViewer()`. Saves on instructions.
 ---<!--
----@diagnostic disable-next-line: lowercase-global
 viewer = client.getViewer()
 
 ---### [GS Extensions]
 ---The current Minecraft version.
+---@type string
 _MCVERSION = client.getVersionName()
 ---### [GS Extensions]
 ---The current Minecraft brand.
+---@type string
 _MCBRAND = client.getClientBrand():gsub("^(.)", string.upper, 1)
 
 ---### [GS Extensions]
 ---The current Java version
+---@type string
 _JAVAVERSION = client.getJavaVersion()
 
 ---### [GS Extensions]
 ---The current Figura version.
 ---@type Figura.version
-_FIGVERSION = client.getFiguraVersion():gsub("%+.*$", "")
+_FIGURAVERSION = client.getFiguraVersion():gsub("%+.*$", "")
 ---### [GS Extensions]
 ---The avatar's recommended version.
 ---@type Figura.version
@@ -91,8 +96,16 @@ _AVATARVERSION = avatar:getVersion():gsub("%+.*$", "")
 ---### [GS Extensions]
 ---A null value for use with `toJson()`.
 ---@type unknown
----@diagnostic disable-next-line: lowercase-global
 null = function() end
 
+
+---### [GS Extensions]
+---Gets the fraction of time between the last tick and the next tick.
+---
+---A global version of `client.getFrameTime` for convinence.
+tickDelta = client.getFrameTime
+
+
+---@diagnostic enable: lowercase-global
 
 return setmetatable(this, thismt)

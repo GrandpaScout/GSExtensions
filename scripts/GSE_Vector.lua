@@ -86,7 +86,9 @@ local _VEC_UP = v_vec3(0, 1)
 local _EPSILON = 2 ^ (-52)
 
 local math = math
+local m_huge = math.huge
 local m_abs = math.abs
+local m_clamp = math.clamp
 local m_max = math.max
 local m_min = math.min
 local m_random = math.random
@@ -440,6 +442,34 @@ function Vector2Methods:randomize(min, max)
   return self:set(m_random(), m_random()):scale(max - min):offset(min)
 end
 
+---### [GS Extensions]
+---Gets the maximum value in the vector.
+---@return number
+function Vector2Methods:max()
+  return m_max(self:unpack())
+end
+
+---### [GS Extensions]
+---Gets the minimum value in the vector.
+---@return number
+function Vector2Methods:min()
+  return m_min(self:unpack())
+end
+
+---### [GS Extensions]
+---Clamps all values in the vector between the two given values.
+---@generic self
+---@param self self
+---@param min? number
+---@param max? number
+---@return self
+function Vector2Methods:clamp(min, max)
+  min, max = min or -m_huge, max or m_huge
+  self[1] = m_clamp(self[1], min, max)
+  self[2] = m_clamp(self[2], min, max)
+  return self
+end
+
 
 ---@class Vector3
 local Vector3Methods = {}
@@ -547,6 +577,35 @@ function Vector3Methods:randomize(min, max)
   end
 
   return self:set(m_random(), m_random(), m_random()):scale(max - min):add(min, min, min)
+end
+
+---### [GS Extensions]
+---Gets the maximum value in the vector.
+---@return number
+function Vector3Methods:max()
+  return m_max(self:unpack())
+end
+
+---### [GS Extensions]
+---Gets the minimum value in the vector.
+---@return number
+function Vector3Methods:min()
+  return m_min(self:unpack())
+end
+
+---### [GS Extensions]
+---Clamps all values in the vector between the two given values.
+---@generic self
+---@param self self
+---@param min number
+---@param max number
+---@return self
+function Vector3Methods:clamp(min, max)
+  min, max = min or -m_huge, max or m_huge
+  self[1] = m_clamp(self[1], min, max)
+  self[2] = m_clamp(self[2], min, max)
+  self[3] = m_clamp(self[3], min, max)
+  return self
 end
 
 
@@ -659,6 +718,36 @@ function Vector4Methods:randomize(min, max)
   end
 
   return self:set(m_random(), m_random(), m_random(), m_random()):scale(max - min):offset(min)
+end
+
+---### [GS Extensions]
+---Gets the maximum value in the vector.
+---@return number
+function Vector4Methods:max()
+  return m_max(self:unpack())
+end
+
+---### [GS Extensions]
+---Gets the minimum value in the vector.
+---@return number
+function Vector4Methods:min()
+  return m_min(self:unpack())
+end
+
+---### [GS Extensions]
+---Clamps all values in the vector between the two given values.
+---@generic self
+---@param self self
+---@param min number
+---@param max number
+---@return self
+function Vector4Methods:clamp(min, max)
+  min, max = min or -m_huge, max or m_huge
+  self[1] = m_clamp(self[1], min, max)
+  self[2] = m_clamp(self[2], min, max)
+  self[3] = m_clamp(self[3], min, max)
+  self[4] = m_clamp(self[4], min, max)
+  return self
 end
 
 
