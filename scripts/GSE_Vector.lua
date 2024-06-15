@@ -104,22 +104,22 @@ VEC = {
   ---A vector sitting at the origin point. `⟨0, 0, 0⟩`
   ZERO = v_vec3(),
   ---A unit vector pointing forward. `⟨0, 0, -1⟩`
-  FORWARD = _VEC_FWD,
+  FORWARD = _VEC_FWD:copy(),
   ---A unit vector pointing right. `⟨1, 0, 0⟩`
-  RIGHT = _VEC_RGT,
+  RIGHT = _VEC_RGT:copy(),
   ---A unit vector pointing up. `⟨0, 1, 0⟩`
-  UP = _VEC_UP,
+  UP = _VEC_UP:copy(),
   ---A vector with a one in every axis. `⟨1, 1, 1⟩`
-  ONE = _VEC_ONE,
+  ONE = _VEC_ONE:copy(),
 
   ---A unit vector pointing north. `⟨0, 0, -1⟩`
-  NORTH = _VEC_FWD,
+  NORTH = _VEC_FWD:copy(),
   ---A unit vector pointing south. `⟨0, 0, 1⟩`
   SOUTH = _VEC_FWD:scale(-1),
   ---A unit vector pointing west. `⟨-1, 0, 0⟩`
   WEST = v_vec3(-1),
   ---A unit vector pointing east. `⟨1, 0, 0⟩`
-  EAST = _VEC_RGT,
+  EAST = _VEC_RGT:copy(),
   ---A unit vector pointing down. `⟨0, -1, 0⟩`
   DOWN = _VEC_UP:scale(-1)
 }
@@ -201,6 +201,55 @@ if false then ---@diagnostic disable: unused-local, missing-return, duplicate-se
   ---@return Vector4
   function VectorsAPI.random4(max) end
 end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
+
+
+---### [GS Extensions]
+---Checks if an axis-aligned box collides with another.
+---
+---Returns a vector that would move box 2 out of box 1 with the least movement possible if successful.  
+---This vector favors pushing positive over negative in YZX order.
+---@param bb1min Vector3
+---@param bb1max Vector3
+---@param bb2min Vector3
+---@param bb2max Vector3
+---@return Vector3? push_vector
+function VectorsAPI.intersectAABB(bb1min, bb1max, bb2min, bb2max)
+  local push
+  local dist = m_huge
+  local pos, neg, newdist
+
+  if (bb2min.y < bb1max.y and bb2max.y > bb1min.y) then
+    pos = bb1max.y - bb2min.y
+    neg = bb2min.y - bb2max.y
+    newdist = m_min(pos ^ 2, neg ^ 2)
+    if newdist < dist then
+      push = v_vec3(0, pos >= -neg and pos or neg)
+      dist = newdist
+    end
+  end
+
+  if (bb2min.z < bb1max.z and bb2max.z > bb1min.z) then
+    pos = bb1max.z - bb2min.z
+    neg = bb2min.z - bb2max.z
+    newdist = m_min(pos ^ 2, neg ^ 2)
+    if newdist < dist then
+      push = v_vec3(0, 0, pos >= -neg and pos or neg)
+      dist = newdist
+    end
+  end
+
+  if (bb2min.x < bb1max.x and bb2max.x > bb1min.x) then
+    pos = bb1max.x - bb2min.x
+    neg = bb2min.x - bb2max.x
+    newdist = m_min(pos ^ 2, neg ^ 2)
+    if newdist < dist then
+      push = v_vec3(pos >= -neg and pos or neg)
+      dist = newdist
+    end
+  end
+
+  return push
+end
 
 ---### [GS Extensions]
 ---Checks if a ray starting at `origin` and going in the given direction will hit the axis-aligned box defined by

@@ -5,13 +5,13 @@
 -- │ │   │ └─╴ │┌───┘ │   │ │ --
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
----@module  "Figura Lua Extensions StdLib" <GSE_StdLib>
+---@module  "Figura Lua Extensions StdBit32" <GSE_StdBit32>
 ---@version v1.0.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds more functions to Lua's standard bit32 library.
 
-local ID = "GSE_StdLib"
+local ID = "GSE_StdBit32"
 local VER = "1.0.0"
 local FIG = {"0.1.1", "0.1.4"}
 
@@ -94,9 +94,6 @@ _G.SHR = bit32.rshift
 _G.SHAR = bit32.arshift
 _G.ROL = bit32.lrotate
 _G.ROR = bit32.rrotate
-_G.NAND = bit32.bnand
-_G.NOR = bit32.bnor
-_G.XNOR = bit32.bxnor
 
 if false then ---@diagnostic disable: unused-local, missing-return, duplicate-set-field
   ---### [GS Extensions]
@@ -188,6 +185,7 @@ end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
 function bit32.bnand(...)
   return b_bnot(b_band(...))
 end
+_G.NAND = bit32.bnand
 
 ---### [GS Extensions]
 ---##### Requires `.loadStdLib()`
@@ -195,12 +193,14 @@ end
 function bit32.bnor(...)
   return b_bnot(b_bor(...))
 end
+_G.NOR = bit32.bnor
 
 ---### [GS Extensions]
 ---Returns the bitwise *exclusive nor* of its operands.
 function bit32.bxnor(...)
   return b_bnot(b_bxor(...))
 end
+_G.XNOR = bit32.bxnor
 
 ---### [GS Extensions]
 ---Returns the amount of leading zeros in the given number.

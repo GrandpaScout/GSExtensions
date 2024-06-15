@@ -161,7 +161,7 @@ if false then ---@diagnostic disable: unused-local, missing-return, duplicate-se
 end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
 
 --- LuaLS shenanigans
-Client["" .. "getCameraForward"] = Client.getCameraDir
+Client[("getCameraForward")] = Client.getCameraDir
 
 ---### [GS Extensions]
 ---Returns a unit vector pointing right relative to the direction the camera is looking in.

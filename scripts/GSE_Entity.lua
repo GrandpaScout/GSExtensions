@@ -343,12 +343,10 @@ end
 ---TODO: Verify this.
 ---@return BlockState[]
 function Entity:getGroundBlocks()
-  local min = self:getPos(frameTime())
-  local bbox = self:getBoundingBox()
+  local min = self:getPos(frameTime()):sub(0, 2 ^ -44)
+  local bbox = self:getBoundingBox():mul(bboxmul)
 
-  min:sub(bbox * bboxmul)
-
-  return world.getBlocks(min, min + bbox)
+  return world.getBlocks(min - bbox, min:add(bbox))
 end
 
 
