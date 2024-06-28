@@ -22,6 +22,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
 ---
+---### *Does not require GSECommon!*
+---
 ---**<u>Contributes:</u>**
 ---* `<World>`
 ---  * `.newEntity()`
@@ -228,7 +230,7 @@ end
 ---### [GS Extensions]
 ---Finds every block in an area matching the given predicate.
 ---
----The `predicate` determines which block should be found.
+---The `predicate` determines which blocks should be found.
 ---* If it is a string, it will be used as a Lua Pattern to match the id of a block. Succeeds if a match is found.
 ---* If it is a table, it will be indexed with the id of a block. Succeeds if a value of `true` is found.
 ---* If it is a function, it is called with the argument being a block. Succeeds if `true` is returned.

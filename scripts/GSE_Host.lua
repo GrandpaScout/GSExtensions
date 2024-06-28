@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Host" <GSE_Host>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds more fields and methods to Figura's Host api and viewers.
 
 local ID = "GSE_Host"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `<HostAPI>`
@@ -58,6 +60,7 @@ function Host:getStatusEffect(id)
     effect_id = id
   else
     local ns, name = id:match("^([^:]-):?(.*)$")
+    if not ns then return nil end
     if ns == "" then ns = "minecraft" end
     effect_id = "effect." .. ns .. "." .. name
   end
@@ -85,6 +88,7 @@ function Viewer:getStatusEffect(id)
     effect_id = id
   else
     local ns, name = id:match("^([^:]-):?(.*)$")
+    if not ns then return nil end
     if ns == "" then ns = "minecraft" end
     effect_id = "effect." .. ns .. "." .. name
   end

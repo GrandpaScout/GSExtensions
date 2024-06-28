@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Clients" <GSE_Client>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds more fields and methods to Figura's Client api.
 
 local ID = "GSE_Client"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `client`
@@ -61,7 +63,12 @@ local m_tan = math.tan
 
 local client = client
 local c_getCameraPos = client.getCameraPos
+local c_getCameraRot = client.getCameraRot
+local c_getCameraDir = client.getCameraDir
 local c_getFrameTime = client.getFrameTime
+local c_getFOV = client.getFOV
+local c_getWindowSize = client.getWindowSize
+local c_getMousePos = client.getMousePos
 
 
 
@@ -161,22 +168,20 @@ if false then ---@diagnostic disable: unused-local, missing-return, duplicate-se
 end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
 
 --- LuaLS shenanigans
-Client[("getCameraForward")] = Client.getCameraDir
+Client[("getCameraForward")] = c_getCameraDir
 
 ---### [GS Extensions]
 ---Returns a unit vector pointing right relative to the direction the camera is looking in.
 ---@return Vector3
 function Client.getCameraRight()
-  return client.getCameraForward():cross(_VEC_UP):normalize()
+  return c_getCameraDir():cross(_VEC_UP):normalize()
 end
 
 ---### [GS Extensions]
 ---Returns a unit vector pointing up relative to the direction the camera is looking in.
 ---@return Vector3
 function Client.getCameraUp()
-  return client.getCameraForward():scale(-1):cross(
-    client.getCameraForward():cross(_VEC_UP):normalize()
-  )
+  return c_getCameraDir():scale(-1):cross(c_getCameraDir():cross(_VEC_UP):normalize())
 end
 
 ---### [GS Extensions]
@@ -196,7 +201,7 @@ end
 ---Modify the `.fovEffects` field to emulate this setting.
 ---@return number
 function Client.getTrueFOV()
-  return m_lerp(_truefov, truefov, c_getFrameTime()) * client.getFOV()
+  return m_lerp(_truefov, truefov, c_getFrameTime()) * c_getFOV()
 end
 
 local localm4 = matrices.mat4()
@@ -208,7 +213,7 @@ local mulvec = vec(-1, 1, -1)
 ---vectors with `:applyDir()`.
 ---@return Matrix4
 function Client.getCameraMatrix()
-  local cam_rot = client.getCameraRot()
+  local cam_rot = c_getCameraRot()
   return localm4
     :reset()
     :rotateX(-cam_rot.x)
@@ -224,26 +229,26 @@ end
 ---@return Vector3
 function Client.getAimDir()
   if _VIEWER == _HOST and not (host:getScreen() or action_wheel:isEnabled() or host.unlockCursor) then
-    return client.getCameraDir()
+    return c_getCameraDir()
   end
 
-  local scr_size = client.getWindowSize()
-  local mouse_pos = client.getMousePos():div(scr_size)
+  local scr_size = c_getWindowSize()
+  local mouse_pos = c_getMousePos():div(scr_size)
 
   if mouse_pos.x < 0 or mouse_pos.x > 1
     or mouse_pos.y < 0 or mouse_pos.y > 1
     or mouse_pos.x == 0.5 and mouse_pos.y == 0.5
   then
-    return client.getCameraDir()
+    return c_getCameraDir()
   end
 
   mouse_pos:scale(2):sub(1, 1)
 
   local ratio = (scr_size.x / scr_size.y)
 
-  local fov = m_rad(m_lerp(_truefov, truefov, c_getFrameTime()) * client.getFOV())
+  local fov = m_rad(m_lerp(_truefov, truefov, c_getFrameTime()) * c_getFOV())
   local hfov = 2 * m_atan(m_tan(fov * 0.5) * ratio)
-  local cam_rot = client.getCameraRot()
+  local cam_rot = c_getCameraRot()
   local ret = localm4
     :reset()
     :rotateX(-cam_rot.x)

@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Colors" <GSE_Color>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds a new library for handling colors.
 
 local ID = "GSE_Color"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Requires GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `colors`
@@ -43,15 +45,17 @@ local thismt = {
   }
 }
 
+---@type Lib.GS.Extensions.Common
+local common = require((...):gsub("(.)$", "%1.") .. "GSECommon")
 
 local m_clamp = math.clamp
 
 local c_coldiv = 1 / 255
 local c_huediv, c_satdiv = 1 / 360, 1 / 100
 
-local vec3 = vectors.vec3
-local _VEC_ZERO = vec3()
-local _VEC_ONE = vec3(1, 1, 1)
+local v_vec3 = vectors.vec3
+local _VEC_ZERO = v_vec3()
+local _VEC_ONE = v_vec3(1, 1, 1)
 local v_icol = vectors.intToRGB
 
 local frameTime = client.getFrameTime
@@ -151,7 +155,7 @@ end
 ---* `SM_`: Source console text colors.
 ---* `FIG_`: Base Figura colors or colors of Figura assets.
 ---* `USR_`: Colors of well-known Figura users. Want your color in this category? Ask.
-COLOR = {
+COLOR = common.enumcopy {
   ---### `#FFFFFF`
   WHITE = v_icol(0xFFFFFF),
 
@@ -553,7 +557,7 @@ end
 ---@return Vector3 color
 function colors.saturate(vec, mult)
   local hsv = vectors.rgbToHSV(vec)
-  hsv.y = hsv.y * mult
+  hsv.y = m_clamp(hsv.y * mult, 0, 1)
   return vectors.hsvToRGB(hsv)
 end
 
@@ -565,7 +569,7 @@ end
 ---@return Vector3 color
 function colors.brighten(vec, mult)
   local hsv = vectors.rgbToHSV(vec)
-  hsv.z = hsv.z * mult
+  hsv.z = m_clamp(hsv.z * mult, 0, 1)
   return vectors.hsvToRGB(hsv)
 end
 
@@ -591,7 +595,7 @@ end
 ---
 ---Speed is measured in cycles/second.
 ---@param speed number
----@param offset number
+---@param offset? number
 ---@param sat? number
 ---@param val? number
 ---@return Vector3 color
@@ -602,9 +606,9 @@ function colors.rainbow(speed, offset, sat, val)
     return _VEC_ZERO:copy()
   else
     return vectors.hsvToRGB(
-      (world.getTime(frameTime()) * speed * 0.05 + offset) % 1,
-      sat and m_clamp(sat, 0, 1) or 1,
-      val and m_clamp(val, 0, 1) or 1
+      (world.getTime(frameTime()) * speed * 0.05 + (offset and offset * c_huediv or 0)) % 1,
+      sat and m_clamp(sat, 0, 100) * 0.01 or 1,
+      val and m_clamp(val, 0, 100) * 0.01 or 1
     )
   end
 end

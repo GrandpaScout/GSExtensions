@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
 ---
+---### *Does not require GSECommon!*
+---
 ---**<u>Contributes:</u>**
 ---* `_ENV`
 ---  * `mat()`

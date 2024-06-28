@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions StdBit32" <GSE_StdBit32>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds more functions to Lua's standard bit32 library.
 
 local ID = "GSE_StdBit32"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -22,6 +22,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `bit32`
@@ -63,11 +65,12 @@ local _NAN = 0 / 0
 local _MAXFLOAT = 340282346638528859811704183484516925440
 local _MINFLOAT = 2 ^ -149
 
-local b_bnot = bit32.bnot
-local b_band = bit32.band
-local b_bor = bit32.bor
-local b_bxor = bit32.bxor
-local b_rshift = bit32.rshift
+local stdbit32 = bit32
+local b_bnot = stdbit32.bnot
+local b_band = stdbit32.band
+local b_bor = stdbit32.bor
+local b_bxor = stdbit32.bxor
+local b_rshift = stdbit32.rshift
 
 local math = math
 local m_huge = math.huge
@@ -89,11 +92,11 @@ _G.NOT = b_bnot
 _G.AND = b_band
 _G.OR = b_bor
 _G.XOR = b_bxor
-_G.SHL = bit32.lshift
-_G.SHR = bit32.rshift
-_G.SHAR = bit32.arshift
-_G.ROL = bit32.lrotate
-_G.ROR = bit32.rrotate
+_G.SHL = stdbit32.lshift
+_G.SHR = stdbit32.rshift
+_G.SHAR = stdbit32.arshift
+_G.ROL = stdbit32.lrotate
+_G.ROR = stdbit32.rrotate
 
 if false then ---@diagnostic disable: unused-local, missing-return, duplicate-set-field
   ---### [GS Extensions]
@@ -185,7 +188,7 @@ end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
 function bit32.bnand(...)
   return b_bnot(b_band(...))
 end
-_G.NAND = bit32.bnand
+_G.NAND = stdbit32.bnand
 
 ---### [GS Extensions]
 ---##### Requires `.loadStdLib()`
@@ -193,14 +196,14 @@ _G.NAND = bit32.bnand
 function bit32.bnor(...)
   return b_bnot(b_bor(...))
 end
-_G.NOR = bit32.bnor
+_G.NOR = stdbit32.bnor
 
 ---### [GS Extensions]
 ---Returns the bitwise *exclusive nor* of its operands.
 function bit32.bxnor(...)
   return b_bnot(b_bxor(...))
 end
-_G.XNOR = bit32.bxnor
+_G.XNOR = stdbit32.bxnor
 
 ---### [GS Extensions]
 ---Returns the amount of leading zeros in the given number.
@@ -216,6 +219,50 @@ end
 ---@return integer
 function bit32.clo(x)
   return 32 - m_floor(m_log(b_bnot(x), 2))
+end
+
+---### [GSExtensions]
+---Converts a single-precision float value into an integer containing the float's bits.
+---@param x number
+---@return integer bits
+function bit32.floatbits(x)
+  if x ~= x then return 0xFFC00000 end
+  if x < _MINFLOAT then return 0 end
+
+  local sign = x < 0 and 0x80000000 or 0
+  if m_abs(x) > _MAXFLOAT then return 0x7F800000 + sign end
+
+  local d = (x * 0.5) * (2 ^ 30)
+  x = d - (d - x)
+
+  local frac, exp = m_frexp(m_abs(x))
+
+  return exp == -1022
+    and (frac * 2^23 + sign)
+    or ((frac * 2^24) % 0x800000 + ((exp + 0x7E) * 2^23) + sign)
+end
+
+---### [GSExtensions]
+---Converts a double-precision number value into two integers containing the double's bits.
+---@param x number
+---@return integer high
+---@return integer low
+function bit32.doublebits(x)
+  if x ~= x then return 0xFFF80000, 0 end
+  if x == 0 then return 0, 0 end
+
+  local sign = x < 0 and 0x80000000 or 0
+  if m_abs(x) == m_huge then return 0x7FF00000 + sign, 0 end
+
+  local frac, exp = m_frexp(m_abs(x))
+
+  if exp == -1022 then
+    local fracbits = frac * 2^52
+    return b_rshift(fracbits, 32) + sign, fracbits % 0x100000000
+  else
+    local fracbits = (frac * 2^53) % 0x10000000000000
+    return (b_rshift(fracbits, 32) + (exp + 0x3FE) * 2^20) + sign, fracbits % 0x100000000
+  end
 end
 
 ---### [GSExtensions]
@@ -264,50 +311,6 @@ function bit32.todouble(high, low)
     return m_ldexp(fracbits * 2^-52, -1022) * sign
   else
     return m_ldexp((fracbits + 0x10000000000000) * 2^-53, expbits - 0x3FE) * sign
-  end
-end
-
----### [GSExtensions]
----Converts a single-precision float value into an integer containing the float's bits.
----@param x number
----@return integer bits
-function bit32.floatbits(x)
-  if x ~= x then return 0xFFC00000 end
-  if x < _MINFLOAT then return 0 end
-
-  local sign = x < 0 and 0x80000000 or 0
-  if m_abs(x) > _MAXFLOAT then return 0x7F800000 + sign end
-
-  local d = (x * 0.5) * (2 ^ 30)
-  x = d - (d - x)
-
-  local frac, exp = m_frexp(m_abs(x))
-
-  return exp == -1022
-    and (frac * 2^23 + sign)
-    or ((frac * 2^24) % 0x800000 + ((exp + 0x7E) * 2^23) + sign)
-end
-
----### [GSExtensions]
----Converts a double-precision number value into two integers containing the double's bits.
----@param x number
----@return integer high
----@return integer low
-function bit32.doublebits(x)
-  if x ~= x then return 0xFFF80000, 0 end
-  if x == 0 then return 0, 0 end
-
-  local sign = x < 0 and 0x80000000 or 0
-  if m_abs(x) == m_huge then return 0x7FF00000 + sign, 0 end
-
-  local frac, exp = m_frexp(m_abs(x))
-
-  if exp == -1022 then
-    local fracbits = frac * 2^52
-    return b_rshift(fracbits, 32) + sign, fracbits % 0x100000000
-  else
-    local fracbits = (frac * 2^53) % 0x10000000000000
-    return (b_rshift(fracbits, 32) + (exp + 0x3FE) * 2^20) + sign, fracbits % 0x100000000
   end
 end
 

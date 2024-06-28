@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Keybinds" <GSE_Keybind>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds more methods to Figura's keybinds.
 
 local ID = "GSE_Keybind"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Requires GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `pings`
@@ -59,6 +61,8 @@ local thismt = {
   }
 }
 
+---@type Lib.GS.Extensions.Common
+local common = require((...):gsub("(.)$", "%1.") .. "GSECommon")
 
 local _HOST = host:isHost()
 
@@ -77,7 +81,7 @@ local b_btest = bit32.btest
 
 ---### [GS Extensions]
 ---An enum of numerical key codes.
-KEY = {
+KEY = common.enum {
   -- Undefined key
   UNKNOWN = 0,
 
@@ -146,7 +150,7 @@ KEY = {
 
 ---### [GS Extensions]
 ---An enum of modifer key bits.
-KEYMOD = {
+KEYMOD = common.enum {
   NONE = 0,
   SHIFT = 1,
   CONTROL = 2, CTRL = 2,
@@ -156,7 +160,7 @@ KEYMOD = {
 
 ---### [GS Extensions]
 ---An enum of key press states.
-KEYSTATE = {
+KEYSTATE = common.enum {
   RELEASE = 0,
   PRESS = 1,
   HOLD = 2
@@ -357,6 +361,7 @@ function KeybindMethods:autosave(id)
   local oldcfg = config:getName()
   config:setName("GSE-Keys")
   local saved_key = config:load(id)
+  config:setName(oldcfg)
   ---@cast saved_key string?
   keybind_config[self] = {
     config_key = id,
@@ -365,15 +370,14 @@ function KeybindMethods:autosave(id)
   }
 
   if saved_key then self:setKey(saved_key) end
-  config:setName(oldcfg)
   return self
 end
 
 ---### [GS Extensions]
----Gets if this keybind is set up for autosaving.
----@return boolean
+---Gets this keybind's autosave key if it has one.
+---@return string?
 function KeybindMethods:isAutosaved()
-  return _HOST and keybind_config[self] ~= nil
+  return _HOST and keybind_config[self] and keybind_config[self].config_key or nil
 end
 
 ---### [GS Extensions]
@@ -398,10 +402,10 @@ function KeybindMethods:watch()
 end
 
 ---### [GS Extensions]
----Gets if this keybind is watching the vanilla keybind it was created with.
----@return boolean
+---Gets the vanilla keybind this keybind is watching if it was created with one.
+---@return Minecraft.keybind?
 function KeybindMethods:isWatching()
-  return _HOST and keybind_watch[self] ~= nil
+  return _HOST and keybind_watch[self] or nil
 end
 
 ---### [GS Extensions]

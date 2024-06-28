@@ -22,6 +22,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
 ---
+---### *Does not require GSECommon!*
+---
 ---**<u>Contributes:</u>**
 ---* `table`
 ---  * `.append()`
@@ -50,9 +52,13 @@ local thismt = {
   }
 }
 
+local math = math
+local m_floor = math.floor
 local m_random = math.random
 
 local t_insert = table.insert
+
+local w_newBlock = world.newBlock
 
 
 ---==================================================================================================================---
@@ -106,8 +112,10 @@ function table.deepcopy(tbl, data, _DONE)
     if t == "table" then
       copy[k] = _DONE[v] or deepcopy(v, data, _DONE)
     elseif data and datatypes[t] then
-      if t == "BlockState" then
-        copy[k] = world.newBlock(v:toStateString(), v:getPos())
+      if _DONE[v] then
+        copy[k] = _DONE[v]
+      elseif t == "BlockState" then
+        copy[k] = w_newBlock(v:toStateString(), v:getPos())
       else
         copy[k] = v:copy()
       end
@@ -262,11 +270,24 @@ function table.pairs(tbl)
 end
 
 ---### [GS Extensions]
+---Reverses the order of the given sequential table.
+---@param tbl any[]
+function table.reverse(tbl)
+  local len = #tbl
+  local half = m_floor(len / 2)
+  local rev
+  for i = 1, half do
+    rev = len - i + 1
+    tbl[i], tbl[rev] = tbl[rev], tbl[i]
+  end
+end
+
+---### [GS Extensions]
 ---Creates a copy of a sequential table in reverse order.
 ---@generic V
 ---@param tbl V[]
 ---@return V[]
-function table.reverse(tbl)
+function table.reversed(tbl)
   local rev = {}
   local len = #tbl
   for i = 1, len do rev[i] = tbl[len - i + 1] end

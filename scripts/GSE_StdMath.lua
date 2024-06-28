@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Math" <GSE_StdMath>
----@version v1.0.0
+---@version v1.0.1
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds functions and constants to Lua's standard math library.
 
 local ID = "GSE_StdMath"
-local VER = "1.0.0"
+local VER = "1.0.1"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -24,6 +24,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `math`
@@ -72,11 +74,12 @@ local _NAN = 0 / 0
 local _MAXFLOAT = 2^128 * (0xFFFFFF * 2^-24)
 local _MINFLOAT = 2^-149
 
-local m_huge = math.huge
-local m_abs = math.abs
-local m_floor = math.floor
-local m_fmod = math.fmod
-local m_modf = math.modf
+local stdmath = math
+local m_huge = stdmath.huge
+local m_abs = stdmath.abs
+local m_floor = stdmath.floor
+local m_fmod = stdmath.fmod
+local m_modf = stdmath.modf
 
 
 
@@ -122,18 +125,18 @@ math.minfloat = _MINFLOAT
 
 ---### [GS Extensions]
 ---Euler's number.
-math.e = math.exp(1)
+math.e = stdmath.exp(1)
 
 ---### [GS Extensions]
 ---The value of *τ*. (2*π*)
-math.tau = math.pi * 2
+math.tau = stdmath.pi * 2
 
 ---### [GS Extensions]
 ---The square root of 2.
-math.sqrt2 = math.sqrt(2)
+math.sqrt2 = stdmath.sqrt(2)
 
 ---### [GS Extensions]
----Snaps a number to a multiple of another number
+---Snaps a number to the nearest multiple of another number.
 ---@param x number
 ---@param snap number
 ---@return number

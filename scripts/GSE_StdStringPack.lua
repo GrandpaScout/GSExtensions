@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions String Pack" <GSE_StdStringPack>
----@version v1.0.0
+---@version v1.0.1
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds the "pack" functions to Lua's standard string library.
 
 local ID = "GSE_StdStringPack"
-local VER = "1.0.0"
+local VER = "1.0.1"
 local FIG = {"0.1.1", "0.1.4"}
 
 ---Adds the "pack" functions to Lua's `string` library.  
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `string`
@@ -64,13 +66,15 @@ local s_char = string.char
 ---====  UTILITY  ===================================================================================================---
 ---==================================================================================================================---
 
-local
-  packerr_noint, packerr_iof, packerr_isize,
-  packerr_nosize, packerr_ssize, packerr_long,
-  packerr_zeros, packerr_nofit, packerr_short =
-  "number has no integer representation", "integer overflow", "integral size (%f) out of limits [1,4]",
-  "missing size for format option 'c'", "string size (%f) out of limits [0,2097152]", "string longer than given size",
-  "string contains zeros", "string length does not fit in given size", "data string too short"
+local packerr_noint = "number has no integer representation"
+local packerr_iof = "integer overflow"
+local packerr_isize = "integral size (%f) out of limits [1,4]"
+local packerr_nosize = "missing size for format option 'c'"
+local packerr_ssize = "string size (%f) out of limits [0,2097152]"
+local packerr_long = "string longer than given size"
+local packerr_zeros = "string contains zeros"
+local packerr_nofit = "string length does not fit in given size"
+local packerr_short = "data string too short"
 
 local pack_fmt = {
   b = function(x)
@@ -412,12 +416,12 @@ packsize_fmt.I = packsize_fmt.i
 ---to the format string `fmt`. (see [§6.4.2](command:extension.lua.doc?["en-us/53/manual.html/6.4.2"]))
 ---
 ---The following format codes are changed:
----* **`=`:** is an alias of `<`
----* **`i[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`
----* **`I[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`
----* **`n`:** is an alias of `d`
----* **`cn`:** n is explicitly limited to 0-2097152
----* **`s[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`
+---* **`=`:** is an alias of `<`.
+---* **`i[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`.
+---* **`I[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`.
+---* **`n`:** is an alias of `d`.
+---* **`cn`:** n is explicitly limited to 0-2097152.
+---* **`s[n]`:** n is limited to 1-4, n defaults to 4 instead of `size_t`.
 ---
 ---The following format codes do not exist due to their types not existing in LuaJ 5.2:
 ---* **`l`:** signed `long`

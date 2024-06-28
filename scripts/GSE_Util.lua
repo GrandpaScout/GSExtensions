@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Utilities" <GSE_Util>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds a library that contains functions that couldn't be put anywhere else.
 
 local ID = "GSE_Util"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `util`
@@ -54,8 +56,8 @@ local b_band = bit32.band
 ---### [GS Extensions]
 ---An extension library with a bunch of utility functions.
 ---@class Lib.GS.Extensions.Util.Lib
-util = {}
-local util = util
+gseutil = {}
+local util = gseutil
 
 ---Calculates total damage done after armor and resistances have been applied.
 ---
@@ -64,13 +66,15 @@ local util = util
 ---@param dmg number
 ---@param armor? number
 ---@param toughness? number
+---@param breach? number
 ---@param epf? number
 ---@param res? number
 ---@return number
-function util.calculateDamage(dmg, armor, toughness, epf, res)
-  dmg = m_clamp(dmg, 0, 2048)
+function util.calculateDamage(dmg, armor, toughness, breach, epf, res)
+  dmg = m_clamp(dmg, 0, 0x7FFFFFFF)
   armor = armor and m_clamp(armor, 0, 30) or 0
   toughness = toughness and m_clamp(toughness, 0, 20) or 0
+  breach = breach and m_clamp(breach, 0, 7) or 0
   epf = epf and m_clamp(epf, 0, 20) or 0
   res = res and m_clamp(res, 0, 5) or 0
 
@@ -81,13 +85,13 @@ function util.calculateDamage(dmg, armor, toughness, epf, res)
   if res == 5 then return 0 end
 
   if not zero_armor then
-    dmg = dmg * (1 - m_min(20, m_max(armor * 0.2, armor - ((4 * dmg) / (toughness + 8)))) * 0.04)
+    dmg = dmg * (1 - (m_max(0, m_min(20, m_max(armor * 0.2, armor - 4 * dmg / (toughness + 8))) * 0.04 - breach * 0.15)))
   end
 
   if not zero_epf then dmg = dmg * (1 - (epf * 0.04)) end
-  if not zero_res then return dmg * (1 - (res * 0.2)) end
+  if not zero_res then return m_max(0, dmg * (1 - (res * 0.2))) end
 
-  return dmg
+  return m_max(0, dmg)
 end
 
 ---@alias Lib.GS.Extensions.Util.damageMask number
@@ -185,14 +189,16 @@ local armor_stats = {
 ---If the given damage type ignores a certain protection value, it will be set to 0.
 ---@param target ItemStack | LivingEntity
 ---@param dmgmask Lib.GS.Extensions.Util.damageMask
+---@param breach number
 ---@return number armor
 ---@return number toughness
+---@return number breach
 ---@return number epf
 ---@return number res
-function util.getProtectionValues(target, dmgmask)
+function util.getProtectionValues(target, dmgmask, breach)
   dmgmask = damage_alias[dmgmask] or dmgmask or 1
 
-  if b_band(dmgmask, 112) == 112 then return 0, 0, 0, 0 end
+  if b_band(dmgmask, 112) == 112 then return 0, 0, 0, 0, 0 end
 
   local armor, toughness, epf = 0, 0, 0
   if type(target) == "ItemStack" then
@@ -252,7 +258,7 @@ function util.getProtectionValues(target, dmgmask)
       end
     end
 
-    return m_clamp(armor, 0, 30), m_clamp(toughness, 0, 20), m_clamp(epf, 0, 20), 0
+    return m_clamp(armor, 0, 30), m_clamp(toughness, 0, 20), breach or 0, m_clamp(epf, 0, 20), 0
   elseif target.getArmor --[[Duck LivingEntityAPI]] then
     local res = 0
     local equip = {
@@ -348,11 +354,11 @@ function util.getProtectionValues(target, dmgmask)
     end
 
     return
-      m_clamp(armor, 0, 30), m_clamp(toughness, 0, 20),
+      m_clamp(armor, 0, 30), m_clamp(toughness, 0, 20), breach or 0,
       m_clamp(epf, 0, 20), m_clamp(res, 0, 5)
   end
 
-  return 0, 0, 0, 0
+  return 0, 0, 0, 0, 0
 end
 
 

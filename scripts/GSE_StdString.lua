@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Strings" <GSE_StdString>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds functions to Lua's standard string library.
 
 local ID = "GSE_StdString"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -22,6 +22,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `string`
@@ -50,11 +52,12 @@ local thismt = {
 
 local math = math
 local m_floor = math.floor
+local m_log = math.log
 
-local kb, mb, gb, tb, pb = 2^10, 2^20, 2^30, 2^40, 2^50
-local ikb, imb, igb, itb, ipb = 100 / 2^10, 100 / 2^20, 100 / 2^30, 100 / 2^40, 100 / 2^50
-local dkb, dmb, dgb, dtb, dpb = 1e3, 1e6, 1e9, 1e12, 1e15
-local idkb, idmb, idgb, idtb, idpb = 0.1, 1e-4, 1e-7, 1e-10, 1e-13
+local fs_suffix = {[0]=
+  " bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB", " RB", " QB",
+  one_byte = " byte"
+}
 
 
 ---==================================================================================================================---
@@ -96,10 +99,11 @@ function string.split(str, sep, plain)
     return ret
   end
 
+  plain = plain and true or false
   local pos = 1
   -- Make sure the splitting doesn't take an infinte amount of time
   for i = 1, #str do
-    local s, e = str:find(sep, pos, plain and true or false)
+    local s, e = str:find(sep, pos, plain)
     if not s then break end
     ret[i] = str:sub(pos, s - 1)
     pos = e + 1
@@ -130,35 +134,22 @@ function string.filesize(bytes, dec)
   bytes = m_floor(tonumber(bytes))
 
   if bytes <= 0 then
-    return "0 bytes"
-  elseif dec then
-    if bytes < dkb then
-      return bytes .. " bytes"
-    elseif bytes < dmb then
-      return (m_floor(bytes * idkb + 0.5) * 0.01) .. " KB"
-    elseif bytes < dgb then
-      return (m_floor(bytes * idmb + 0.5) * 0.01) .. " MB"
-    elseif bytes < dtb then
-      return (m_floor(bytes * idgb + 0.5) * 0.01) .. " GB"
-    elseif bytes < dpb then
-      return (m_floor(bytes * idtb + 0.5) * 0.01) .. " TB"
-    else
-      return (m_floor(bytes * idpb + 0.5) * 0.01) .. " PB"
-    end
+    return "0" .. fs_suffix[0]
+  elseif bytes == 1 then
+    return "1" .. fs_suffix.one_byte
   else
-    if bytes < kb then
-      return bytes .. " bytes"
-    elseif bytes < mb then
-      return (m_floor(bytes * ikb + 0.5) * 0.01) .. " KB"
-    elseif bytes < gb then
-      return (m_floor(bytes * imb + 0.5) * 0.01) .. " MB"
-    elseif bytes < tb then
-      return (m_floor(bytes * igb + 0.5) * 0.01) .. " GB"
-    elseif bytes < pb then
-      return (m_floor(bytes * itb + 0.5) * 0.01) .. " TB"
-    else
-      return (m_floor(bytes * ipb + 0.5) * 0.01) .. " PB"
+    local base = dec and 1000 or 1024
+    local mag = m_floor(m_log(bytes, base))
+
+    if mag >= #fs_suffix then
+      local maxmag = #fs_suffix
+      return (m_floor(bytes * 100 / base^maxmag + 0.5) * 0.01) .. fs_suffix[maxmag]
     end
+
+    local edge = dec and (999.9945 / 1000) or (1023.9945 / 1024)
+    if bytes >= (base^(mag+1) * edge) then return "1" .. fs_suffix[mag + 1] end
+
+    return (m_floor(bytes * 100 / base^mag + 0.5) * 0.01) .. fs_suffix[mag]
   end
 end
 

@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Items" <GSE_Item>
----@version v1.0.0
+---@version v1.0.1
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds a library for manipulating items and adds more methods to Figura's ItemStacks.
 
 local ID = "GSE_Item"
-local VER = "1.0.0"
+local VER = "1.0.1"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -20,6 +20,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `itemstacks`
@@ -43,8 +45,6 @@ local thismt = {
 }
 
 
-local w_newItem = world.newItem
-
 local math = math
 local m_huge = math.huge
 local m_pi = math.pi
@@ -57,6 +57,11 @@ local table = table
 local t_insert = table.insert
 local t_remove = table.remove
 
+local world = world
+local w_newItem = world.newItem
+local w_getDimension = world.getDimension
+local w_getSpawnPoint = world.getSpawnPoint
+
 
 ---==================================================================================================================---
 ---====  GLOBALS  ===================================================================================================---
@@ -64,7 +69,7 @@ local t_remove = table.remove
 
 ---### [GS Extensions]
 ---An Air item.
-ITEM_AIR = world.newItem("minecraft:air")
+ITEM_AIR = w_newItem("minecraft:air")
 
 
 ---==================================================================================================================---
@@ -165,8 +170,6 @@ local vec_half = vec(0.5, 0, 0.5)
 local vecmul = vec(1, 0, 1)
 local degfloat = 1 / 360
 local day_divisor = 1 / 24000
-local getDim = world.getDimension
-local getSpawn = world.getSpawnPoint
 
 ---@alias Lib.GS.Extensions.Item.predicate string
 ---| "angle"             # Gets the angle of a compass.
@@ -210,15 +213,15 @@ local predicates = {
     if item.id == "minecraft:compass" then
       data = item.tag
       if data.LodestonePos then
-        if getDim() ~= data.LodestoneDimension then return 0 end
+        if w_getDimension() ~= data.LodestoneDimension then return 0 end
         data = data.LodestonePos
         dir = vec(data.X, 0, data.Z):add(vec_half):sub(ent:getPos():mul(vecmul)):normalize()
       else
-        dir = getSpawn():add(vec_half):mul(vecmul):sub(ent:getPos():mul(vecmul)):normalize()
+        dir = w_getSpawnPoint():add(vec_half):mul(vecmul):sub(ent:getPos():mul(vecmul)):normalize()
       end
     elseif item.id == "minecraft:recovery_compass" then
       data = ent:getNbt().LastDeathLocation
-      if not data or getDim() ~= data.dimension then return 0 end
+      if not data or w_getDimension() ~= data.dimension then return 0 end
       data = data.pos
       dir = vec(data[1], 0, data[3]):add(vec_half):sub(ent:getPos():mul(vecmul)):normalize()
     else
@@ -282,7 +285,7 @@ local predicates = {
     return (action == "SPEAR") and 1 or 0
   end,
   time = function(item)
-    if item.id ~= "minecraft:clock" or getDim() ~= "minecraft:overworld" then return 0 end
+    if item.id ~= "minecraft:clock" or w_getDimension() ~= "minecraft:overworld" then return 0 end
     local frac = (world.getTimeOfDay() * day_divisor - 0.25) % 1
     return (m_deg((frac * 2 + (0.5 - m_cos(frac * m_pi) * 0.5)) / 3) % 360) * degfloat
   end,

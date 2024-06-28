@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Entities" <GSE_Entity>
----@version v1.0.0
+---@version v1.0.1
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds a new library for getting entities and adds more methods to Figura's entities.
 
 local ID = "GSE_Entity"
-local VER = "1.0.0"
+local VER = "1.0.1"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -21,6 +21,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Does not require GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `entities`
@@ -225,7 +227,7 @@ if false then ---@diagnostic disable: unused-local, missing-return, duplicate-se
 end ---@diagnostic enable: unused-local, missing-return, duplicate-set-field
 
 --- LuaLS shenanigans
-Entity["" .. "getForward"] = Entity.getLookDir
+Entity[("getForward")] = Entity.getLookDir
 
 ---### [GS Extensions]
 ---Returns a unit vector pointing right relative to the direction this entity is looking in.

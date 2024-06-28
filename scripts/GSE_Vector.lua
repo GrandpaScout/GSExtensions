@@ -6,13 +6,13 @@
 -- │ └─┐ └─────┘└─────┘ ┌─┘ │ --
 -- └───┘                └───┘ --
 ---@module  "Figura Lua Extensions Vectors" <GSE_Vector>
----@version v1.0.0
+---@version v1.1.0
 ---@see     GrandpaScout @ https://github.com/GrandpaScout
 -- GSExtensions adds some miscellaneous functions and variables to the standard Figura library for convenience.
 -- This extension adds functions to Figura's vectors library and methods to Figura's Vectors.
 
 local ID = "GSE_Vector"
-local VER = "1.0.0"
+local VER = "1.1.0"
 local FIG = {"0.1.1", "0.1.4"}
 
 
@@ -22,6 +22,8 @@ local FIG = {"0.1.1", "0.1.4"}
 ---
 ---Any fields, functions, and methods injected by this library will be prefixed with **[GS&nbsp;Extensions]** in their
 ---description to avoid confusion between features of the standard library and this extension.
+---
+---### *Requires GSECommon!*
 ---
 ---**<u>Contributes:</u>**
 ---* `vectors`
@@ -76,6 +78,9 @@ local thismt = {
   }
 }
 
+---@type Lib.GS.Extensions.Common
+local common = require((...):gsub("(.)$", "%1.") .. "GSECommon")
+
 local vectors = vectors
 local v_vec3 = vectors.vec3
 local _VEC_ONE = v_vec3(1, 1, 1)
@@ -93,6 +98,8 @@ local m_max = math.max
 local m_min = math.min
 local m_random = math.random
 
+local t_unpack = table.unpack
+
 
 ---==================================================================================================================---
 ---====  GLOBALS  ===================================================================================================---
@@ -100,7 +107,7 @@ local m_random = math.random
 
 ---### [GS Extensions]
 ---Contains preset vectors for easy access.
-VEC = {
+VEC = common.enumcopy {
   ---A vector sitting at the origin point. `⟨0, 0, 0⟩`
   ZERO = v_vec3(),
   ---A unit vector pointing forward. `⟨0, 0, -1⟩`
@@ -327,6 +334,29 @@ function VectorsAPI.order(tomin, tomax)
 end
 
 ---### [GS Extensions]
+---Creates two vectors containing the minimum values and maximum values of the two vectors respectively.
+---@generic V: Vector
+---@param vec1 V
+---@param vec2 V
+---@return V min
+---@return V max
+function VectorsAPI.ordered(vec1, vec2)
+  local min = {}
+  local max = {}
+  local minv, maxv
+  for i = 1, m_max(#vec1, #vec2) do
+    minv, maxv = vec1[i] or 0, vec2[i] or 0
+    if minv <= maxv then
+      min[i], max[i] = minv, maxv
+    else
+      min[i], max[i] = maxv, minv
+    end
+  end
+
+  return vec(t_unpack(min)), vec(t_unpack(max))
+end
+
+---### [GS Extensions]
 ---Checks if a point is within the axis-aligned bounds defined by `bbmin` and `bbmax`.
 ---@param point Vector
 ---@param bbmin Vector
@@ -513,9 +543,10 @@ end
 ---@param max? number
 ---@return self
 function Vector2Methods:clamp(min, max)
-  min, max = min or -m_huge, max or m_huge
-  self[1] = m_clamp(self[1], min, max)
-  self[2] = m_clamp(self[2], min, max)
+  min = min or -m_huge
+  max = max or m_huge
+  self.x = m_clamp(self.x, min, max)
+  self.y = m_clamp(self.y, min, max)
   return self
 end
 
@@ -650,10 +681,11 @@ end
 ---@param max number
 ---@return self
 function Vector3Methods:clamp(min, max)
-  min, max = min or -m_huge, max or m_huge
-  self[1] = m_clamp(self[1], min, max)
-  self[2] = m_clamp(self[2], min, max)
-  self[3] = m_clamp(self[3], min, max)
+  min = min or -m_huge
+  max = max or m_huge
+  self.x = m_clamp(self.x, min, max)
+  self.y = m_clamp(self.y, min, max)
+  self.z = m_clamp(self.z, min, max)
   return self
 end
 
@@ -791,11 +823,12 @@ end
 ---@param max number
 ---@return self
 function Vector4Methods:clamp(min, max)
-  min, max = min or -m_huge, max or m_huge
-  self[1] = m_clamp(self[1], min, max)
-  self[2] = m_clamp(self[2], min, max)
-  self[3] = m_clamp(self[3], min, max)
-  self[4] = m_clamp(self[4], min, max)
+  min = min or -m_huge
+  max = max or m_huge
+  self.x = m_clamp(self.x, min, max)
+  self.y = m_clamp(self.y, min, max)
+  self.z = m_clamp(self.z, min, max)
+  self.w = m_clamp(self.w, min, max)
   return self
 end
 
